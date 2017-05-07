@@ -5,29 +5,84 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.Random;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 
 import goals.dream.t_clone_1.R;
 import goals.dream.t_clone_1.SettingsActivity;
 
 import static android.R.attr.defaultValue;
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
+import static goals.dream.t_clone_1.R.id.tv_show_x;
 
 public class MainActivity extends AppCompatActivity {
+
+     String email_phone_key = "xxxxxx@gmail.com";
+    String password_phone_key = "password_xxx";
+
+    String email;
+    String password;
+    String zipcode;
+
+    int current_step;
+    int current_step_count;
+
+    int timer_main_delay;
+    int timer_sub_delay;
+    boolean auto_post = false;
+    long post_started_time;
+
+    String title;
+    String body;
+
+    String location;
+    String geographic_area;
+    String postal_code;
+
+    String category;
+    String sub_category;
+
+    String employment_type;
+    String remuneration;
+
+    String send_line_to_log;
+    String next_ad_post_id;
+
+
+    TextView my_text_log;
+    EditText my_row_id;
+    WebView wv1;
+
+    Button btn_start_main_timer;
+    Button btn_click_counter;
+    Button btn_read_nextad_timer_main;
+    Button btn_timer_sub;
+
+
     //SharedPreferences========================================================
     public static final String MyPREFERENCES = "MyPrefs" ;
     public static final String key_1 = "k1";
@@ -126,49 +181,62 @@ public class MainActivity extends AppCompatActivity {
     public void buttonOnClick(View view) {
         int the_id = view.getId();
         if (the_id == R.id.b_1) {
-            Random rand = new Random();
-            int my_rand = rand.nextInt(20);
-            int my_rand_2 = rand.nextInt(20);
-//SharedPreferences========================================================
-            sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedpreferences.edit();
-//SharedPreferences========================================================
-            editor.putString(key_1, String.valueOf(my_rand));
-            editor.putString(key_2, String.valueOf(my_rand_2));
-            editor.putString(key_3, "333333333333333333333");
-            editor.apply(); //replaced commit with apply
 
-            Toast.makeText(this, "but_1_works\n"
-                    +String.valueOf(my_rand)+
-                    "\n"+String.valueOf(my_rand_2), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "b_1", Toast.LENGTH_SHORT).show();
         }
         if (the_id == R.id.b_2) {
-
-
-            sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-            String highScore = sharedpreferences.getString(key_1,"default");
-            String some_name = sharedpreferences.getString(key_2,"default");
-            Toast.makeText(this, "but_2_works -- key_1+key_2"+"\n"+
-                            highScore+"\n"+
-                            some_name+"\n"
-                    , Toast.LENGTH_SHORT).show();
-
-
-
-            Button b1_x=(Button)this.findViewById(R.id.b_1);
-            b1_x.setText(highScore);
-            b1_x.setTextColor(Color.parseColor("#0404B4"));
+          Toast.makeText(this, "b_2", Toast.LENGTH_SHORT).show();
         }
         if (the_id == R.id.b_3) {
-            //use this for the settings is using PREFERECE MANAGER
-            sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            //find the example_text in the pref_general.xml file
-            String hhh = sharedpreferences.getString("example_text","xxx");
-            Toast.makeText(this, "but_3_works\n"+hhh, Toast.LENGTH_SHORT).show();
+
+
+            //read_nextad_post();
+            new read_row_json().execute(); //pass it the email and password from here duh
+            //pass it the params here so you can fucking reuse it !!
+            //like new read_row_json().execute(url_remote,email_remote,password_remote);
+
+
+           TextView tv_show_x = (TextView)findViewById(R.id.tv_show_x);
+            tv_show_x.setMovementMethod(new ScrollingMovementMethod());
+           tv_show_x.append("555"+"\n"+global_x+"\n"+email+"\n"+password+"\n"+zipcode);
+            //Toast.makeText(this, "b_3", Toast.LENGTH_SHORT).show();
         }
 
     }
 
+String global_x = "global";
+    //need internet permissions
+    //add jsoup.jar to folder you can create called libs(resides next to app folder)
+    public class read_row_json extends AsyncTask<Void,Void,Void> {
+        String words;
+        //String sql_row_id = my_row_id.getText().toString();
+        String sql_row_id = "125";
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+Document doc = Jsoup.connect("http://www.dreamgoals.info/cl_post/read_row_json.php?id="+sql_row_id+"&email="+"taiwanskout@gmail.com").get();
+//Document doc = Jsoup.connect("http://www.dreamgoals.info/craig").get();
+
+                words = doc.text();
+                global_x = words;
+            } catch (IOException e){e.printStackTrace();}return null;}
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //my_text_log.setText(words);
+
+            try {
+                JSONObject mainObject = new JSONObject(words);
+
+                email = mainObject.getString("email");
+                password = mainObject.getString("password");
+                zipcode = mainObject.getString("zip_code"); // has an underscore
+
+            } catch (JSONException e) {e.printStackTrace();}
+
+        }
+    }
 
 
 }

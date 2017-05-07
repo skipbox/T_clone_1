@@ -12,7 +12,8 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="goals.dream.menu_1.MainActivity"
     tools:showIn="@layout/activity_main"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -46,8 +47,9 @@
     </LinearLayout>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Menu_2 ??" />
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:text="Menu_2 ??"
+        android:id="@+id/tv_show_x" />
 
 </LinearLayout>

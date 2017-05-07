@@ -29,7 +29,7 @@
         android:title="" />
     <item
         android:id="@+id/icon_1"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_cloud"
         android:orderInCategory="100"
         app:showAsAction="always"
         android:title="" />
